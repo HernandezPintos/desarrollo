@@ -253,19 +253,25 @@ class ReconocimientoDatos:
 
 
 
+    
     def extraer_siniestro(self):
-        # Patrón para buscar un número con guiones o espacios separadores
-        patron_siniestro = r"(?i)S?tro\s*:\s*([\d\s\/\*\.,-]+)"
+        """
+        Extrae el número de siniestro usando una búsqueda tolerante.
+        Busca la palabra 'siniestro' seguida de cualquier texto no numérico
+        y luego un número de 7 a 10 dígitos.
+        """
+        patron_general = r"(?i)SINI[EI]STRO[^\d]{0,15}(\d{7,10})"
+        match = re.search(patron_general, self.texto)
+        if match:
+            return match.group(1)
 
+        # fallback: buscar líneas que contienen "siniestro" y escanear manualmente
+        for linea in self.texto.splitlines():
+            if "siniestro" in linea.lower():
+                posible_numero = re.search(r"(\d{7,10})", linea)
+                if posible_numero:
+                    return posible_numero.group(1)
 
-        # Buscar el número de siniestro en el texto
-        resultado_siniestro = re.search(patron_siniestro, self.texto)
-
-        if resultado_siniestro:
-            siniestro = resultado_siniestro.group(1)
-            # Remover caracteres no permitidos en nombres de archivos
-            siniestro = re.sub(r'[\\/:\*\?"<>\|]', '_', siniestro)
-            return siniestro
         return None
 
     def extraer_poliza(self):
